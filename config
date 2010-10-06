@@ -1,0 +1,6 @@
+
+ngx_auto_lib_system_paths='/usr/local /usr /usr/pkg /opt/local'
+
+. $ngx_addon_dir/openssl
+. $ngx_addon_dir/pcre
+. $ngx_addon_dir/zlib

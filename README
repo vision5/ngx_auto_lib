@@ -1,0 +1,119 @@
+
+Nginx Library Auto-Discovery Module
+-----------------------------------
+
+Description
+-----------
+
+This module searches for compiled versions of OpenSSL, PCRE and Zlib so that
+if they are required for an Nginx compilation and compiled versions are available,
+then the pre-compiled versions are used rather than re-compiling new ones each
+time Nginx is built.
+
+It is likely to be of most interest to anyone who regularly compiles Nginx from
+source.
+
+
+
+Installation
+------------
+
+The module can be added like any other, but it MUST BE THE LAST ADDON MODULE, 
+since it checks values set by other modules to determine whether or not libraries
+are required.
+
+./configure [other config options] --add-module=/path/to/ngx_auto_lib
+
+
+
+Specifying paths
+----------------
+
+There are two ways to specify paths to library directories. The first is to set
+variables [PREFIX]_INC and [PREFIX]_LIB before configure.
+
+e.g.
+export OPENSSL_LIB=/path/to/openssl/lib
+export OPENSSL_INC=/path/to/openssl/include     # without the additional /openssl
+
+Alternatively, the conventional method of setting paths in the configure script
+are valid.
+
+e.g.
+--with-openssl=/path/to/openssl
+
+Note : Unlike the normal setting, the /path/to/openssl can be EITHER A SOURCE DIR
+(e.g. where Nginx has previously built a library from source) OR AN INSTALLATION DIR.
+The module will test both types of path if they exist.
+
+
+
+Automatically searching for user-compiled folders
+-------------------------------------------------
+
+If no exact directory is specified (by either of the above methods), the there are
+two folders under which build directories are searched. The first can be set by
+[PREFIX]_BASE, and the second is the directory that the Nginx source is located in.
+
+When doing auto-searches, a search is made for all directories beginning with the
+standard prefix for the library (e.g. openssl-), and the directories are tested for
+valid installations, starting with the most recent version.
+
+e.g. There are two directories 'openssl-0.9.8m' and 'openssl-1.0.0a' in the same
+directory that the Nginx source is located in. The first of these that is tested is
+version 1.0.0a, then 0.9.8m.
+
+These tests are automatic if no exact path is given anywhere, but can be turned off
+by setting [PREFIX]_NO_SEARCH_BASE and [PREFIX]_NO_SEARCH_SRC_DIR respectively to
+any non-empty value.
+
+
+
+Using system libraries
+----------------------
+
+If no exact paths are given, and the user-compiled versions of the libraries yield
+no usable builds, then some standard system paths are searched. Currently the tests
+are for /usr/local /usr /usr/pkg /opt/local - though this can be easily changed by
+changing the path in the config file.
+
+These tests can be turned off by setting [PREFIX]_NO_SEARCH_SYSTEM to any non-empty
+value.
+
+
+
+Variables to export
+-------------------
+
+PREFIX ::= OPENSSL | PCRE | ZLIB
+
+[PREFIX]_LIB                path to lib dir
+[PREFIX]_INC                path to include dir
+[PREFIX]_BASE               directory to search for user-compiled versions of libraries
+[PREFIX]_NO_SEARCH_BASE     do not search in directories under the folder [PREFIX]_BASE
+[PREFIX]_NO_SEARCH_SRC_DIR  do not search in directories under the source folder
+[PREFIX]_NO_SEARCH_SYSTEM   do not search in the default system folders
+
+e.g.
+
+PCRE_LIB=/usr/local/pcre/lib
+PCRE_INC=/usr/local/pcre/include
+ZLIB_NO_SEARCH_SYSTEM=1
+
+
+
+TODO :
+
+- PCRE + ZLIB
+- check that reordering of mail modules in OpenSSL config file does not cause problems
+
+
+
+License :
+
+    BSD
+
+
+Copright :
+
+    2010 (c) Marcus Clyne
