@@ -168,10 +168,13 @@ test_openssl_core() {
         esac
     fi
 
-    # Some builds of OpenSSL require Zlib functions so we link it here
+    # Some builds of OpenSSL require Zlib so we link it here if it will be available
 
     ngx_feature_libs_saved="$ngx_feature_libs"
-    ngx_feature_libs="$ngx_feature_libs -lz"
+
+    if [ $USE_ZLIB = YES ]; then
+        ngx_feature_libs="$ngx_feature_libs -lz"
+    fi
 
     . auto/feature
     [ $ngx_found = yes ] && return 0
