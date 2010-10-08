@@ -379,6 +379,7 @@ that the linker links to is the same as the one specified. This is done because
 To do
 -----
 
+- handle adding to HTTP rather than CORE
 - change how library paths are searched to include both shared and static libraries
 - touch up documentation
 
