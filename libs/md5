@@ -18,7 +18,7 @@ ngx_auto_lib_check() {
 
 ngx_auto_lib_setup() {
 
-    if [ $USE_OPENSSL_MD5 = YES ] || [ $OPENSSL != NONE ]; then
+    if [ $AUTO_OPENSSL = YES ]; then
 
         ngx_feature_haves='NGX_OPENSSL_MD5  NGX_HAVE_OPENSSL_MD5  NGX_HAVE_OPENSSL_MD5_H'
         ngx_feature_inc_names='md5'
@@ -34,6 +34,7 @@ ngx_auto_lib_setup() {
         NGX_AUTO_LIB_SHARED=$OPENSSL_SHARED
 
     else
+
         # Pre-existing OpenSSL has not been found so must be compiled
         # so just let Nginx handle the compilation as normal
 

@@ -18,7 +18,7 @@ ngx_auto_lib_check() {
 
 ngx_auto_lib_setup() {
 
-    if [ $USE_OPENSSL_SHA1 = YES ] || [ $OPENSSL != NONE ]; then
+    if [ $AUTO_OPENSSL = YES ]; then
 
         ngx_feature_haves='NGX_OPENSSL_SHA1  NGX_HAVE_OPENSSL_SHA1  NGX_HAVE_OPENSSL_SHA1_H'
         ngx_feature_inc_names='sha'

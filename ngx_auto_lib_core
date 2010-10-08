@@ -61,7 +61,6 @@ ev="$ev     lib_files"
 ev="$ev     lib_names"
 ev="$ev     libs_to_add"
 ev="$ev     modules"
-ev="$ev     reject"
 ev="$ev     srcs"
 ev="$ev     shared"
 ev="$ev     test_libs"
@@ -137,25 +136,34 @@ ngx_auto_lib_get_variables() {
     eval NGX_AUTO_LIB_SEARCH_LIB_INC=\"\$${PFX}_SEARCH_LIB_INC\"
     eval NGX_AUTO_LIB_SEARCH_DIR=\"\$${PFX}_SEARCH_DIR\"
     eval NGX_AUTO_LIB_SEARCH_BASE=\"\$${PFX}_SEARCH_BASE\"
+    eval NGX_AUTO_LIB_SEARCH_BASE_PREFIX=\"\$${PFX}_SEARCH_BASE_PREFIX\"
     eval NGX_AUTO_LIB_SEARCH_PARENT=\"\$${PFX}_SEARCH_PARENT\"
     eval NGX_AUTO_LIB_SEARCH_SYSTEM=\"\$${PFX}_SEARCH_SYSTEM\"
     eval NGX_AUTO_LIB_SHARED=\"\$${PFX}_SHARED\"
     eval NGX_AUTO_LIB_SYSTEM_DIRS=\"\$${PFX}_SYSTEM_DIR\"
     eval USE_NGX_AUTO_LIB=\"\$USE_${LIB}\"
 
-    if [ ! $NGX_AUTO_LIB_DIR ]; then
+    if [ -z "$NGX_AUTO_LIB_DIR" ]; then
         NGX_AUTO_LIB_DIR=NONE
     fi
 
-    if [ ! $USE_NGX_AUTO_LIB ]; then
-        USE_NGX_AUTO_LIB=YES
+    if [ -z "$USE_NGX_AUTO_LIB" ]; then
+        if [ ! -z "$ngx_feature_check_macros_defined" -o ! -z "$ngx_feature_check_macros_non_zero" ]; then
+            USE_NGX_AUTO_LIB=MAYBE
+        elif [ "$ngx_feature_required" = no ]; then
+            USE_NGX_AUTO_LIB=MAYBE
+        else
+            USE_NGX_AUTO_LIB=YES
+        fi
     fi
 
-    if [ ! $NGX_AUTO_LIB_SYSTEM_DIRS ]; then
+    if [ -z "$NGX_AUTO_LIB_SYSTEM_DIRS" ]; then
         NGX_AUTO_LIB_SYSTEM_DIRS=$NGX_AUTO_LIB_DEFAULT_SYSTEM_DIRS
     fi
 
-    if [ ! $NGX_AUTO_LIB_SHARED ]; then
+    # TODO : add _STATIC, and do searches for both static and shared libs
+
+    if [ -z "$NGX_AUTO_LIB_SHARED" ]; then
         if [ "$ngx_feature_shared" = no ]; then
             NGX_AUTO_LIB_SHARED=NO
         else
@@ -163,43 +171,40 @@ ngx_auto_lib_get_variables() {
         fi
     fi
 
+
     NGX_AUTO_LIB_SEARCH_DEP=NO
 
     # set default search methods
     # Note : these can be over-ridden by setting NGX_AUTO_LIB_SEARCH_[type]=YES|NO
 
-    if [ $NGX_AUTO_LIB_INC ] || [ $NGX_AUTO_LIB_LIB ]; then
+    local auto=y
 
+    if [ ! -z "$NGX_AUTO_LIB_INC" ] || [ ! -z "$NGX_AUTO_LIB_LIB" ]; then
         ngx_auto_lib_search  LIB_INC    YES
-        ngx_auto_lib_search  DIR        NO
-        ngx_auto_lib_search  BASE       NO
-        ngx_auto_lib_search  PARENT     NO
-        ngx_auto_lib_search  SYSTEM     NO
+        auto=n
+    fi
 
-    elif [ $NGX_AUTO_LIB_DIR != NONE ]; then
-
-        ngx_auto_lib_search  LIB_INC    NO
+    if [ $NGX_AUTO_LIB_DIR != NONE ]; then
         ngx_auto_lib_search  DIR        YES
-        ngx_auto_lib_search  BASE       NO
-        ngx_auto_lib_search  PARENT     NO
-        ngx_auto_lib_search  SYSTEM     NO
+        auto=n
+    fi
 
-    elif [ $NGX_AUTO_LIB_BASE ]; then
-
-        ngx_auto_lib_search  LIB_INC    NO
-        ngx_auto_lib_search  DIR        NO
+    if [ ! -z "$NGX_AUTO_LIB_BASE" ]; then
         ngx_auto_lib_search  BASE       YES
-        ngx_auto_lib_search  PARENT     NO
-        ngx_auto_lib_search  SYSTEM     NO
+        auto=n
+    fi
 
-    else
-
-        ngx_auto_lib_search  LIB_INC    NO
-        ngx_auto_lib_search  DIR        NO
-        ngx_auto_lib_search  BASE       NO
+    if [ $auto = y ]; then
         ngx_auto_lib_search  PARENT     YES
         ngx_auto_lib_search  SYSTEM     YES
     fi
+
+    ngx_auto_lib_search  LIB_INC    NO
+    ngx_auto_lib_search  DIR        NO
+    ngx_auto_lib_search  BASE       NO
+    ngx_auto_lib_search  PARENT     NO
+    ngx_auto_lib_search  SYSTEM     NO
+
 
     if [ -z "$ngx_feature_lib_names" ]; then
         ngx_feature_lib_names=$pfx
@@ -226,7 +231,7 @@ ngx_auto_lib_set_default() {
     local def=$2
     local var="NGX_AUTO_LIB$suffix"
 
-    if [ -n `eval echo \$$var` ]; then
+    if [ -z ${!var} ]; then
         eval $var=\"$def\"
     fi
     #eval echo "$var = \$$var"
@@ -284,7 +289,7 @@ ngx_auto_lib_check_auto_config() {
     ngx_auto_lib_clean_feature_vars
 
     ngx_feature=$1
-    ngx_feature_inc_path="`echo $CFLAGS | tr ' ' '\n' | grep -- -D | tr '\n' ' '` -DNGX_HAVE_OPENSSL_SHA1"
+    ngx_feature_inc_path="`echo $CFLAGS | tr ' ' '\n' | grep -- -D | tr '\n' ' '`"
     ngx_feature_incs="#include <$NGX_AUTO_CONFIG_H>"
     ngx_feature_libs=
     ngx_feature_path=`pwd`
@@ -300,7 +305,6 @@ ngx_auto_lib_check_auto_config() {
     else
         rv=1
     fi
-
 
     ngx_auto_lib_reset_feature_vars
 
@@ -331,6 +335,8 @@ ngx_auto_lib_check_require() {
 
     if [ $USE_NGX_AUTO_LIB = YES ]; then
         return 0
+    elif [ $USE_NGX_AUTO_LIB = NO ]; then
+        return 1
     fi
 
 
@@ -420,17 +426,19 @@ ngx_auto_lib_test_setup() {
                 ngx_feature_libs="$ngx_feature_libs -l$lib"
             done
 
+            # TODO : only add --rpath when the path is not a standard system path - warn if /usr
+
             ngx_feature_libs="$ngx_feature_libs -Wl,--rpath -Wl,$LIB"
+
         else
-            if [ ! -z "$lib_files" ]; then
-                for lib in $lib_files; do
-                    ngx_feature_libs="$ngx_feature_libs $LIB/$lib"      
-                done
-            else
-                for lib in $libs; do
-                    ngx_feature_libs="$ngx_feature_libs $LIB/lib$lib.a"
-                done
-            fi
+
+            for lib in $lib_files; do
+                ngx_feature_libs="$ngx_feature_libs $LIB/$lib"      
+            done
+
+            for lib in $libs; do
+                ngx_feature_libs="$ngx_feature_libs $LIB/lib$lib.a"
+            done
         fi
     fi
 
@@ -446,7 +454,7 @@ ngx_auto_lib_test_setup() {
         # all linked shared objects, even if supplied directly by setting 
         # $ngx_feature_libs instead of usign $ngx_feature_lib_names
 
-        # TODO : allow for some libraries to not be checked here if desired?
+        # TODO : allow for some libraries to not be checked here if desired - if part of system paths
 
         libs="`echo $ngx_feature_libs | tr ' ' '\n' | grep -- -l | sed 's|-l||g'`"
 
@@ -570,6 +578,9 @@ ngx_auto_lib_run_tests() {
     local MSG=$NGX_AUTO_LIB_MSG
 
 
+    ngx_found=no
+
+
     # dependency
 
     if [ $NGX_AUTO_LIB_SEARCH_DEP = YES ]; then
@@ -597,8 +608,17 @@ ngx_auto_lib_run_tests() {
     # directories beginning with '$pfx-' that are in $NGX_AUTO_LIB_BASE (e.g. $OPENSSL_BASE)
 
     if [ $NGX_AUTO_LIB_SEARCH_BASE = YES ] && [ $BASE ]; then
+
+        p=$NGX_AUTO_LIB_SEARCH_BASE_PREFIX
+
+        if [ "$p" = YES ]; then
+            p="-name $pfx-*"
+        elif [ ! -z "$p" ]; then
+            p="-name $p*"
+        fi
+
         ngx_auto_lib_test_dirs " (found under \$${PFX}_BASE)" \
-                `find $BASE -type d -name $pfx-* 2> /dev/null | sort -r`  && return 0
+                `find $BASE/* -maxdepth 0 -type d $p 2> /dev/null | sort -r`  && return 0
     fi
 
 
@@ -607,7 +627,7 @@ ngx_auto_lib_run_tests() {
     if [ $NGX_AUTO_LIB_SEARCH_PARENT = YES ]; then
         local src_dir=`cd ..; pwd`
         ngx_auto_lib_test_dirs " (found under Nginx source parent dir)" \
-                `find $src_dir -type d -name $pfx-* 2> /dev/null | sort -r` && return 0
+                `find $src_dir/* -maxdepth 0 -type d -name $pfx-* 2> /dev/null | sort -r` && return 0
     fi
 
 
@@ -625,7 +645,11 @@ ngx_auto_lib_run_tests() {
 #######################
 
 ngx_auto_lib_run() {
+
     ngx_auto_lib_get_variables
+
+    eval AUTO_$NGX_AUTO_LIB_PFX=NO
+
     ngx_auto_lib_check_require  || return
     ngx_auto_lib_setup          || return
     ngx_auto_lib_save_feature_vars
@@ -699,6 +723,7 @@ ngx_auto_lib_set_generic_variables() {
     eval ${PFX}_INC=$INC
     eval ${PFX}_LIB=$LIB
     eval ${PFX}_SHARED=$NGX_AUTO_LIB_SHARED
+    eval AUTO_$PFX=YES
 }
 
 ngx_auto_lib_set_custom_variables() {
