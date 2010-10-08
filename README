@@ -1,6 +1,6 @@
 
-Nginx Library Auto-Discovery Module
------------------------------------
+Nginx Auto Lib Module
+--------------s-------
 
 Description
 -----------
@@ -16,22 +16,6 @@ overall process of including external libraries in Nginx compilations easier,
 especially when custom compilations of libraries are used.
 
 
-Use for module developers
--------------------------
-
-The majority of the work done by this module is in the ngx_auto_lib_core file,
-which is a generic library handler for Nginx modules. Any module developers that
-require external libraries for their modules are encouraged to include this file
-in their module's config file rather than defining their own config files from
-scratch.
-
-Using ngx_auto_lib_core will generally reduce handling external dependencies to
-just a few lines of code (the current implementation of zlib takes just 7 lines), 
-and will be able to handle differences in default search paths on different
-operating systems in a consistent manner between modules.
-
-The documentation for how to use ngx_auto_lib_core is in a separate file.
-
 
 Installation
 ------------
@@ -40,103 +24,61 @@ The module can be added like any other, but it MUST BE THE LAST ADDON MODULE,
 since it checks values set by other modules to determine whether or not libraries
 are required.
 
+[set variables if desired]
 ./configure [other config options] --add-module=/path/to/ngx_auto_lib
 
 
 
-Specifying paths
-----------------
+Setting variables to control where libraries are found
+------------------------------------------------------
 
-There are two ways to specify paths to library directories. The first is to set
-variables [PREFIX]_INC and [PREFIX]_LIB before configure.
+Auto Lib has a more flexible configuration system for determining where libraries
+are found than the core Nginx distribution. See README_AUTO_LIB under the user 
+section for more details.
 
-e.g.
-export OPENSSL_LIB=/path/to/openssl/lib
-export OPENSSL_INC=/path/to/openssl/include     # without the additional /openssl
+In that file :
 
-Alternatively, the conventional method of setting paths in the configure script
-are valid.
-
-e.g.
---with-openssl=/path/to/openssl
-
-Note : Unlike the normal setting, the /path/to/openssl can be EITHER A SOURCE DIR
-(e.g. where Nginx has previously built a library from source) OR AN INSTALLATION DIR.
-The module will test both types of path if they exist.
+PFX ::= MD5 | OPENSSL | PCRE | SHA1 | ZLIB
 
 
 
-Automatically searching for user-compiled folders
--------------------------------------------------
+Notes for module developers
+---------------------------
 
-If no exact directory is specified (by either of the above methods), the there are
-two folders under which build directories are searched. The first can be set by
-[PREFIX]_BASE, and the second is the directory that the Nginx source is located in.
+The majority of the work done by this module is in the ngx_auto_lib_core file,
+which is a generic library handler for Nginx modules. Any module developers that
+require external libraries for their modules are encouraged to include this file
+in their module's config file rather than defining their own config files from
+scratch. Even if you have already written config files that include searches for
+libraries, you are encouraged to include this file to replace your existing 
+implementation because it will likely provide more flexibility to the end user
+and may be more robust.
 
-When doing auto-searches, a search is made for all directories beginning with the
-standard prefix for the library (e.g. openssl-), and the directories are tested for
-valid installations, starting with the most recent version.
-
-e.g. There are two directories 'openssl-0.9.8m' and 'openssl-1.0.0a' in the same
-directory that the Nginx source is located in. The first of these that is tested is
-version 1.0.0a, then 0.9.8m.
-
-These tests are automatic if no exact path is given anywhere, but can be turned off
-by setting [PREFIX]_NO_SEARCH_BASE and [PREFIX]_NO_SEARCH_SRC_DIR respectively to
-any non-empty value.
+See the developers section of the README_AUTO_LIB for more details.
 
 
 
-Using system libraries
-----------------------
-
-If no exact paths are given, and the user-compiled versions of the libraries yield
-no usable builds, then some standard system paths are searched. Currently the tests
-are for /usr/local /usr /usr/pkg /opt/local - though this can be easily changed by
-changing the path in the config file.
-
-These tests can be turned off by setting [PREFIX]_NO_SEARCH_SYSTEM to any non-empty
-value.
-
-
-
-Variables to export
--------------------
-
-PREFIX ::= OPENSSL | PCRE | ZLIB
-
-[PREFIX]_LIB                path to lib dir
-[PREFIX]_INC                path to include dir
-[PREFIX]_BASE               directory to search for user-compiled versions of libraries
-[PREFIX]_NO_SEARCH_BASE     do not search in directories under the folder [PREFIX]_BASE
-[PREFIX]_NO_SEARCH_PARENT   do not search in directories under the parent source folder
-[PREFIX]_NO_SEARCH_SYSTEM   do not search in the default system folders
-
-e.g.
-
-PCRE_LIB=/usr/local/pcre/lib
-PCRE_INC=/usr/local/pcre/include
-ZLIB_NO_SEARCH_SYSTEM=1
-
-
-Known issues :
+Known issues
+------------
 
 - does not work correctly with paths that include spaces
 - incomplete documentation
 
 
-To do :
+To do
+-----
 
-- update documentation to include all features
 - check that reordering of mail modules in OpenSSL config file does not cause problems
 
 
 
-License :
+License
+-------
 
     BSD
 
 
-Copright :
+Copright
+--------
 
     2010 (c) Marcus Clyne
