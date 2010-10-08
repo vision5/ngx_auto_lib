@@ -1,5 +1,4 @@
 
-
 . $ngx_addon_dir/ngx_auto_lib_core
 
 ###################################
@@ -12,4 +11,3 @@
 . $ngx_addon_dir/libs/sha1
 . $ngx_addon_dir/libs/pcre
 
-#exit 1
