@@ -71,7 +71,7 @@ ngx_feature_vars=$v
 ngx_feature_extra_vars=$ev
 ngx_feature_all_vars="$v $ev"
 
-NGX_AUTO_LIB_DEFAULT_SYSTEM_DIRS='/usr/local /usr /usr/pkg /opt/local'
+NGX_AUTO_LIB_DEFAULT_SYSTEM_DIRS='/usr/local /usr /opt/local /opt /usr/pkg'
 
 ####################
 ## UTIL FUNCTIONS ##
