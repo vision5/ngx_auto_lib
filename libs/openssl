@@ -1,0 +1,31 @@
+
+ngx_auto_lib_init  OpenSSL
+
+ngx_feature_lib_names='ssl crypto'
+ngx_feature_add_libs=$NGX_LIBDL
+ngx_feature_path_suffixes=openssl
+
+ngx_feature_test="SSL_library_init()"
+
+case "$CC" in
+    cl | bcc32)
+        CFLAGS="$CFLAGS -DNO_SYS_TYPES_H"
+        ngx_feature_build_dirs='openssl'
+        ;;
+    *)
+        ngx_feature_build_dirs='.openssl'
+        ;;
+esac
+
+
+ngx_feature_modules=$OPENSSL_MODULE
+
+ngx_feature_haves='NGX_OPENSSL NGX_SSL'
+ngx_feature_deps="$OPENSSL_DEPS" 
+ngx_feature_srcs="$OPENSSL_SRCS"
+ngx_feature_variables='PCRE=NONE'
+
+ngx_feature_shared=no
+ngx_feature_exit_if_not_found=no
+
+ngx_auto_lib_run

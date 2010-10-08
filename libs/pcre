@@ -1,0 +1,17 @@
+
+ngx_auto_lib_init  PCRE
+
+ngx_feature_test="pcre *re; re = pcre_compile(NULL, 0, NULL, 0, NULL)"
+
+ngx_feature_build_lib_dirs='.libs'
+ngx_feature_path_suffixes=pcre
+
+ngx_feature_haves=NGX_PCRE
+ngx_feature_deps="$REGEX_DEPS"
+ngx_feature_srcs="$REGEX_SRCS"
+ngx_feature_variables='PCRE=NONE'
+
+ngx_feature_shared=no
+ngx_feature_exit_if_not_found=no
+
+ngx_auto_lib_run

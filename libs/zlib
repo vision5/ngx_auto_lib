@@ -1,0 +1,12 @@
+
+ngx_auto_lib_init  Zlib
+
+ngx_feature_inc_names=zlib
+ngx_feature_lib_names=z
+ngx_feature_test="z_stream z; deflate(&z, Z_NO_FLUSH)"
+
+ngx_feature_shared=no
+ngx_feature_exit_if_not_found=no
+
+ngx_auto_lib_run
+

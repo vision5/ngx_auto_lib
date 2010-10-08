@@ -1,6 +1,15 @@
 
-ngx_auto_lib_system_paths='/usr/local /usr /usr/pkg /opt/local'
 
-. $ngx_addon_dir/openssl
-. $ngx_addon_dir/pcre
-. $ngx_addon_dir/zlib
+. $ngx_addon_dir/ngx_auto_lib_core
+
+###################################
+## LIBS (order can be important) ##
+###################################
+
+. $ngx_addon_dir/libs/zlib
+. $ngx_addon_dir/libs/openssl
+. $ngx_addon_dir/libs/md5
+. $ngx_addon_dir/libs/sha1
+. $ngx_addon_dir/libs/pcre
+
+#exit 1
