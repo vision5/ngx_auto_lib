@@ -23,7 +23,6 @@ ngx_feature_modules=$OPENSSL_MODULE
 ngx_feature_haves='NGX_OPENSSL NGX_SSL'
 ngx_feature_deps="$OPENSSL_DEPS" 
 ngx_feature_srcs="$OPENSSL_SRCS"
-ngx_feature_variables='PCRE=NONE'
 
 ngx_feature_shared=no
 ngx_feature_exit_if_not_found=no

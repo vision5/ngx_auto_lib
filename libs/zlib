@@ -9,4 +9,3 @@ ngx_feature_shared=no
 ngx_feature_exit_if_not_found=no
 
 ngx_auto_lib_run
-
