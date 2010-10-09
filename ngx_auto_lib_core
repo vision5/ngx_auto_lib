@@ -678,7 +678,11 @@ ngx_auto_lib_post_tests() {
 ## SET VARIABLES FUNCTIONS ##
 #############################
 
+# TODO : add HTTP/ADDON settings too
+
 ngx_auto_lib_set_core_variables() {
+    # TODO : don't add includes / libs more than once
+
     eval CORE_DEPS=\"$CORE_DEPS $ngx_feature_deps\"
     eval CORE_INCS=\"$CORE_INCS $ngx_feature_path\"
     eval CORE_LIBS=\"$CORE_LIBS $ngx_feature_libs_to_add\"
