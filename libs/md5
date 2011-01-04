@@ -1,0 +1,51 @@
+
+ngx_auto_lib_init  MD5
+
+USE_OPENSSL_MD5=NO
+
+
+ngx_auto_lib_check() {
+
+    if ngx_auto_lib_check_macro_non_zero  NGX_OPENSSL_MD5  NGX_HAVE_OPENSSL_MD5  NGX_HAVE_OPENSSL_MD5_H; then
+
+        USE_OPENSSL_MD5=YES
+        return 0
+    fi
+
+    return 1
+}
+
+
+ngx_auto_lib_setup() {
+
+    if [ $AUTO_OPENSSL = YES ]; then
+
+        ngx_feature_haves='NGX_OPENSSL_MD5  NGX_HAVE_OPENSSL_MD5  NGX_HAVE_OPENSSL_MD5_H'
+        ngx_feature_inc_names='md5'
+        ngx_feature_lib_names='crypto'
+        ngx_feature_path_suffixes=openssl
+        ngx_feature_test="MD5_CTX md5; MD5_Init(&md5)"
+        ngx_feature_variables='MD5_LIB=OpenSSL; OPENSSL_MD5=YES'
+
+        NGX_AUTO_LIB_INC=$OPENSSL_INC
+        NGX_AUTO_LIB_LIB=$OPENSSL_LIB
+        NGX_AUTO_LIB_MSG=" (from previously found OpenSSL)"
+        NGX_AUTO_LIB_SEARCH_DEP=YES
+        NGX_AUTO_LIB_SHARED=$OPENSSL_SHARED
+
+    else
+
+        # Pre-existing OpenSSL has not been found so must be compiled
+        # so just let Nginx handle the compilation as normal
+
+        return 1
+    fi
+
+    return 0
+}
+
+ngx_auto_lib_run
+
+
+# TODO : might want to consider handling non-OpenSSL MD5 libraries as well
+
